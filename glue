@@ -1,0 +1,77 @@
+#!/usr/bin/python3
+
+import re
+import argparse
+import time
+from io import StringIO
+from typing import Callable
+from pathlib import Path
+
+CHUNK_SIZE = 4096
+FILE_SEPARATOR = "\n"
+IMPORT_PATTERN = re.compile(r"from\s+(\.+)(\S+)\s+import\s+\*\s*(?:#.*)?$")
+
+parser = argparse.ArgumentParser(
+    prog="GLUE", description="Basic Python3 file agregator tool"
+)
+
+parser.add_argument(
+    "main",
+    type=Path,
+    help="python file to glue"
+)
+parser.add_argument(
+    "-o", "--output",
+    type=Path,
+    help="name of file to output to"
+)
+parser.add_argument(
+    "-d", "--debug",
+    action="store_true",
+    help="show debug info on run"
+)
+args = parser.parse_args()
+
+
+def functimer(f:Callable):
+    def wrapper(*args, **kwargs):
+        start = time.perf_counter()
+        result = f(*args, **kwargs)
+        end = time.perf_counter()
+        return result, end-start
+    return wrapper
+
+
+def glue_file(file:Path) -> StringIO:
+
+    buffer = StringIO()
+
+    with file.open("r") as main_file:
+
+        for line in main_file:
+
+            if match := IMPORT_PATTERN.match(line):
+                parent_calls = len(match.group(1))
+                subpath = match.group(2).replace(".", "/")+".py"
+                module = args.main.resolve()
+                for _ in range(parent_calls):
+                    module = module.parent
+                module = module / subpath
+                with module.open("r") as mod_file:
+                    while chunk := mod_file.read(CHUNK_SIZE):
+                        buffer.write(chunk)
+                    buffer.write(FILE_SEPARATOR)
+            else:
+                buffer.write(line)
+
+    return buffer
+
+if args.debug:
+    timed_glue_file = functimer(glue_file)
+    buffer, duration = timed_glue_file(args.main)
+    print(f"Time Spent Parsing: {duration*1000:f}ms")
+else:
+    buffer = glue_file(args.main)
+
+with args.output.open("w") as out_file:
+    out_file.write(buffer.getvalue())
