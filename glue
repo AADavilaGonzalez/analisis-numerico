@@ -31,7 +31,8 @@ parser.add_argument(
     help="show debug info on run"
 )
 args = parser.parse_args()
-
+if not args.output:
+    args.output = args.main.with_name(args.main.stem+"_glued.py")
 
 def functimer(f:Callable):
     def wrapper(*args, **kwargs):
@@ -45,25 +46,28 @@ def functimer(f:Callable):
 def glue_file(file:Path) -> StringIO:
 
     buffer = StringIO()
+    glued_files: set[Path] = set()
 
-    with file.open("r") as main_file:
+    def parse(file:Path) -> None:
+        resolved_file = file.resolve()
+        glued_files.add(resolved_file)
 
-        for line in main_file:
+        with file.open("r") as f:
+            for line in f:
+                if match := IMPORT_PATTERN.match(line):
+                    parent_calls = len(match.group(1))
+                    subpath = match.group(2).replace(".", "/")+".py"
+                    module = resolved_file
+                    for _ in range(parent_calls):
+                        module = module.parent
+                    module = module / subpath
+                    if module not in glued_files:
+                        parse(module)
+                else:
+                    buffer.write(line)
+        buffer.write(FILE_SEPARATOR)
 
-            if match := IMPORT_PATTERN.match(line):
-                parent_calls = len(match.group(1))
-                subpath = match.group(2).replace(".", "/")+".py"
-                module = args.main.resolve()
-                for _ in range(parent_calls):
-                    module = module.parent
-                module = module / subpath
-                with module.open("r") as mod_file:
-                    while chunk := mod_file.read(CHUNK_SIZE):
-                        buffer.write(chunk)
-                    buffer.write(FILE_SEPARATOR)
-            else:
-                buffer.write(line)
-
+    parse(file)
     return buffer
 
 if args.debug:

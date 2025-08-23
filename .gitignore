@@ -1,3 +1,7 @@
+# Poject Specific
+entrega_*
+entrega-*
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[codz]
