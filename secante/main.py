@@ -1,13 +1,12 @@
 from ..utils.titulo import *
+from ..utils.tipos import *
 from ..utils.tabla import *
 
 #DESCRIPCION: programa para calcular las raices reales de dos
 # funciones por medio del metodo del la secante modificada
 
 import math
-from typing import Callable, Iterator
-
-FuncionReal = Callable[[float], float]
+from typing import Iterator
 
 def raiz_por_secante(
     f: FuncionReal,
@@ -42,8 +41,8 @@ def buscar_raiz(
         act = sig
 
 if __name__ == "__main__":
-    f1 = lambda x: 3*x + 2*math.log(x)
-    f2 = lambda x: 2*x-1-(1000/math.pi)*(x**-2 + x**-3)
+    f1 = FuncionReal(lambda x: 3*x + 2*math.log(x))
+    f2 = FuncionReal(lambda x: 2*x-1-(1000/math.pi)*(x**-2 + x**-3))
     ERROR = 0.000001
 
     print("Soluciones 3x + 2ln(x)")
