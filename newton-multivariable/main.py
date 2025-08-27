@@ -97,13 +97,13 @@ if __name__ == "__main__":
     print("Programa para calcular la solucion a un sistema",
           "no lineal mediante el metodo de Newton-Raphson",
           "Ecuaciones:",
-          "\tsin(x)+e^y-xy=5",
-          "\tx^2+y^3-3xy=7",
+          "\tx^2+xy-10=0",
+          "\ty+3xy^2-57=0",
           sep="\n"
     )
 
-    f1 = lambda x,y: np.sin(x) + np.exp(y) - x*y - 5
-    f2 = lambda x,y: np.pow(x,2) + np.pow(y,3) - 3*x*y - 7
+    f1 = lambda x,y: x**2 + x*y - 10
+    f2 = lambda x,y: y + 3*x*(y**2) - 57
 
     grafica = Grafica(
         xmin = -2, xmax = 6,
@@ -134,18 +134,14 @@ if __name__ == "__main__":
     raices = []
 
     print("Raiz Primer Cuadrante")
-    raiz = buscar_raiz(f, np.array([5,3], dtype=np.float64), 0.000001)
+    raiz = buscar_raiz(f, np.array([1.5,3.5], dtype=np.float64), 0.000001)
     raices.append(raiz)
     print("\n")
 
-    print("Raiz Segundo Cuadrante")
-    raiz = buscar_raiz(f, np.array([-0.5,1.5], dtype=np.float64), 0.000001)
+    print("Raiz Primer Cuarto Cuadrante")
+    raiz = buscar_raiz(f, np.array([4,-2], dtype=np.float64), 0.000001)
     raices.append(raiz)
     print("\n")
-
-    print("Raiz Cuarto Cuadrante")
-    raiz = buscar_raiz(f, np.array([2,-2], dtype=np.float64), 0.000001)
-    raices.append(raiz)
 
     for raiz in raices:
         grafica.punto("", raiz[0], raiz[1], color="green")
