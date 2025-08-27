@@ -72,13 +72,51 @@ match os.name:
 
 
 if __name__ == "__main__":
-    A = np.array([
-        [1,4,4],
-        [4,5,6],
-        [7,8,9],
-    ])
-    b = np.eye(3)
+    clear()
+    print("Solucionador de Sistemas Lineales por Gauss-Jordan")
+    n = 0 
+    while True:
+        try:
+            n_str = input("Ingrese el tamaño de la matriz (n x n): ")
+            n = int(n_str)
+            if n > 0:
+                break
+            else:
+                print("El tamaño debe ser un entero positivo.")
+        except ValueError:
+            print("Por favor, ingrese un número entero válido.")
+
+    print(f"\nIngrese las {n} ecuaciones del sistema.")
+    print("Formato: a1 a2 ... an b (coeficientes y término constante, separados por espacios)")
+
+    A = np.zeros((n, n), dtype=float)
+
+    for i in range(n):
+        while True:
+            prompt = f"Fila {i+1}> "
+            tokens: list[str] = input(prompt).split()
+
+            if len(tokens) != n:
+                print(f"Error: Se necesitan {n} coeficientes. Intente de nuevo.")
+                continue
+            
+            try:
+                A[i] = [float(token) for token in tokens]
+                break
+            except ValueError:
+                print("Error: Uno de los valores no es un número válido. Intente de nuevo.")
+
+    b = np.eye(n, dtype=float)
 
     inv = gauss_jordan(A,b)
 
-    print(inv)
+    print("\nResolviendo el sistema...")
+
+    try:
+        solucion = gauss_jordan(A, b)
+        print("\nLa solución del sistema es:")
+        for i in range(n):
+            print(f"x{i+1} = {solucion[i, 0]:.4f}")
+    except ValueError as e:
+        print(f"\nError al resolver el sistema: {e}")
+        print("La matriz puede ser singular (no tener solución única).")
