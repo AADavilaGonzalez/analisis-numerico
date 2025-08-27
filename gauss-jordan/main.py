@@ -1,3 +1,4 @@
+import re
 try:
     import numpy as np
 except ImportError:
@@ -6,16 +7,35 @@ except ImportError:
           "[py/python/python3] -m pip install numpy", sep="\n")
     exit()
 
+def parse_equation(eq, variables):
+
+    izq, der = eq.split("=")
+    der = float(der.strip())
+
+    coef = [0.0] * len(variables)
+
+    terminos = re.findall(r'([+-]?\d*\.?\d*)\s*(x_\d+)', izq.replace(" ", ""))
+
+    for num, var in terminos:
+        if num in ("", "+"):
+            num = 1.0
+        elif num == "-":
+            num = -1.0
+        else:
+            num = float(num)
+        coef[variables.index(var)] += num
+
+    return coef, der
+
 def gauss_jordan(
     A: np.ndarray,
     b: np.ndarray
 ) -> np.ndarray:
-    """
-    Implementacion del metodo de gauss jordan por medio de una matriz
-    aumentada. A debe ser una matriz cuadrada de nxn mientras que b
-    puede ser un solo vector de n elementos o una matriz de vectores
-    columna de nxm.
-    """
+
+    # Implementacion del metodo de gauss jordan por medio de una matriz
+    # aumentada. A debe ser una matriz cuadrada de nxn mientras que b
+    # puede ser un solo vector de n elementos o una matriz de vectores
+    # columna de nxm.
     if A.ndim != 2:
         raise ValueError("A debe ser una matriz")
 
@@ -77,42 +97,36 @@ if __name__ == "__main__":
     n = 0 
     while True:
         try:
-            n_str = input("Ingrese el tamaño de la matriz (n x n): ")
-            n = int(n_str)
+            n = int(input("Ingrese el numero de variables o ecuaciones de la matriz (n x n): "))
             if n > 0:
+                variables = [f"x_{i+1}" for i in range(n)]
                 break
             else:
                 print("El tamaño debe ser un entero positivo.")
         except ValueError:
             print("Por favor, ingrese un número entero válido.")
 
-    print(f"\nIngrese las {n} ecuaciones del sistema.")
-    print("Formato: a1 a2 ... an b (coeficientes y término constante, separados por espacios)")
-
     A = np.zeros((n, n), dtype=float)
+    b = np.zeros((n, 1), dtype=float)
 
+    print(f"\nIngrese las {n} ecuaciones del sistema (ejemplo: 2x_1 + 3x_2 - x_3 = 5):")
     for i in range(n):
         while True:
-            prompt = f"Fila {i+1}> "
-            tokens: list[str] = input(prompt).split()
-
-            if len(tokens) != n:
-                print(f"Error: Se necesitan {n} coeficientes. Intente de nuevo.")
-                continue
-            
+            eq = input(f"Ecuación {i+1}> ")
             try:
-                A[i] = [float(token) for token in tokens]
+                coef, independiente = parse_equation(eq, variables)
+                A[i] = coef
+                b[i,0] = independiente
                 break
             except ValueError:
                 print("Error: Uno de los valores no es un número válido. Intente de nuevo.")
 
-    b = np.eye(n, dtype=float)
-
-    inv = gauss_jordan(A,b)
-
     print("\nResolviendo el sistema...")
 
     try:
+        if np.linalg.det(A) == 0:
+            print('La matriz tienen un det(A) = 0, por lo tanto el sistema de ecuaciones no tiene una solucion unica.')
+            exit()
         solucion = gauss_jordan(A, b)
         print("\nLa solución del sistema es:")
         for i in range(n):
