@@ -72,4 +72,13 @@ match os.name:
 
 
 if __name__ == "__main__":
-    pass
+    A = np.array([
+        [1,4,4],
+        [4,5,6],
+        [7,8,9],
+    ])
+    b = np.eye(3)
+
+    inv = gauss_jordan(A,b)
+
+    print(inv)
