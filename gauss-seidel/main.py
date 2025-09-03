@@ -125,7 +125,7 @@ if __name__ == "__main__":
 
 
     def mensaje(sistema: SistemaLineal):
-        print("Solucionador de sistemas lineales iterativo:"
+        print("Solucionador de sistemas lineales iterativo:",
               "***Metodo de Relajacion***", sep="\n"
         )
         if sistema.inicializado:
