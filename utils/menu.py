@@ -32,6 +32,7 @@ class Menu(Generic[T]):
         opciones: list[Opcion[T]],
         pre: Accion[T] | None = None,
         pos: Accion[T] | None = None,
+        clear: bool = True,
         indices: bool = True,
         sangria: int = 0,
         prompt: str = "> ",
@@ -42,6 +43,8 @@ class Menu(Generic[T]):
         self.opciones = opciones
         self.pre = pre
         self.pos = pos
+
+        self.clear = clear
 
         self.indexable = indices
         self.mostrar_indices = indices
@@ -80,7 +83,7 @@ class Menu(Generic[T]):
         return wrapper
 
     def mostrar(self) -> None:
-
+        if self.clear: clear()
         if self.pre: self.pre(self.estado)
         for i, opcion in enumerate(self.__opciones_activas()):
             linea = " " * self.sangria_ops
