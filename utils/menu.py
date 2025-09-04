@@ -1,13 +1,15 @@
 import os
 from typing import Callable, TypeVar, Generic, Iterator
 
+__all__ = ["clear", "Accion", "Opcion", "Menu"]
+
 match os.name:
     case "posix":
         clear = lambda: os.system("clear")
     case "nt":
         clear = lambda: os.system("cls")
     case _:
-        clear = lambda: os.system("clear")
+        clear = lambda: None
 
 T = TypeVar("T")
 
@@ -124,6 +126,16 @@ class Menu(Generic[T]):
             accion(self.estado)
         else:
             self.val_inv(self.estado)
+
+
+    def desplegar(self) -> None:
+        self.mostrar()
+        self.seleccionar()
+
+    def desplegar_mientras(self, cond: Callable[[T], bool] = lambda _: False) -> None:
+        while cond(self.estado):
+            self.mostrar()
+            self.seleccionar()
 
 
 if __name__ == "__main__":
