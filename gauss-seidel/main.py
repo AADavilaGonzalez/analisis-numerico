@@ -1,4 +1,4 @@
-from ..utils.titulo import *
+from ..utils.equipo import *
 from ..utils.menu import *
 from ..utils.tabla import *
 from ..utils.rutinas import *
@@ -183,30 +183,9 @@ if __name__ == "__main__":
         print("\nGauss-Seidel con relajacion cargado exitosamente")
 
    
-    @Menu.esperar_entrada
-    @es_inicializador
-    def cargar_lingotes(estado: Estado):
-        estado.sistema.coef = np.array([
-            [20, 30, 20, 30],
-            [50, 40, 40, 20],
-            [20, 10, 10, 20],
-            [10, 20, 30, 10]
-        ], dtype=float)
-        estado.sistema.const = np.array(
-            [27, 39, 15, 19], dtype=float
-        )
-        estado.sistema.dim = 4
-        estado.x0 = np.array(
-            [0.5, 0.5, 0.5, 0.5], dtype=float
-        )
-        estado.w = 0.5
-        print("\nProblema de los lingotes cargado exitosamente")
-
-
     menu_ejemplos = Menu(estado, [
            Opcion("Gauss-Seidel", cargar_gauss_seidel),
            Opcion("Gauss-Seidel con Relajacion", cargar_relajacion),
-           Opcion("Problema de los Lingotes", cargar_lingotes),
            Opcion("Cancelar", lambda _: None)
         ],
         pre=lambda _: print("Elija el ejemplo de clase a cargar:\n"), 
