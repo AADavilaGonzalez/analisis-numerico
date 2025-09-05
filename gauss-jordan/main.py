@@ -13,25 +13,6 @@ except ImportError:
           "[py/python/python3] -m pip install numpy", sep="\n")
     exit()
 
-def parse_equation(eq, variables):
-
-    izq, der = eq.split("=")
-    der = float(der.strip())
-
-    coef = [0.0] * len(variables)
-
-    terminos = re.findall(r'([+-]?\d*\.?\d*)\s*(x_\d+)', izq.replace(" ", ""))
-
-    for num, var in terminos:
-        if num in ("", "+"):
-            num = 1.0
-        elif num == "-":
-            num = -1.0
-        else:
-            num = float(num)
-        coef[variables.index(var)] += num
-
-    return coef, der
 
 def gauss_jordan(
     A: np.ndarray,
