@@ -100,36 +100,23 @@ match os.name:
 if __name__ == "__main__":
     clear()
     print("Solucionador de Sistemas Lineales por Gauss-Jordan")
-    n = 0 
-    while True:
-        try:
-            n = int(input("Ingrese el numero de variables o ecuaciones de la matriz (n x n): "))
-            if n > 0:
-                variables = [f"x_{i+1}" for i in range(n)]
-                break
-            else:
-                print("El tamaño debe ser un entero positivo.")
-        except ValueError:
-            print("Por favor, ingrese un número entero válido.")
+    n = 4
 
-    A = np.zeros((n, n), dtype=float)
-    b = np.zeros((n, 1), dtype=float)
+    A = np.array([[20, 30, 20, 50],
+              [50, 40, 40, 20],
+              [20, 10, 10, 20],
+              [10, 20, 30, 10]], dtype=float)
 
-    print(f"\nIngrese las {n} ecuaciones del sistema (ejemplo: 2x_1 + 3x_2 - x_3 = 5):")
-    for i in range(n):
-        while True:
-            eq = input(f"Ecuación {i+1}> ")
-            try:
-                coef, independiente = parse_equation(eq, variables)
-                A[i] = coef
-                b[i,0] = independiente
-                break
-            except ValueError:
-                print("Error: Uno de los valores no es un número válido. Intente de nuevo.")
+    b = np.array([27, 39, 15, 19], dtype=float)
+
 
     print("\nResolviendo el sistema...")
 
     try:
+        print("Matriz a resolver:\n")
+        for i in range(len(b)):
+            fila = " ".join(f"{A[i][j]:>6}" for j in range(len(b)))
+            print(f"[{fila} | {b[i]:>6}]")
         if np.linalg.det(A) == 0:
             print('La matriz tienen un det(A) = 0, por lo tanto el sistema de ecuaciones no tiene una solucion unica.')
             exit()
@@ -137,6 +124,9 @@ if __name__ == "__main__":
         print("\nLa solución del sistema es:")
         for i in range(n):
             print(f"x{i+1} = {solucion[i, 0]:.4f}")
+        print('Programa elaborado por:')
+        print('Aldo Adrian Davila Gonzalez     1994122\nLuis Fernando Segobia Torres    2177528\nRoberto Sánchez Santoyo         2177547')
+
     except ValueError as e:
         print(f"\nError al resolver el sistema: {e}")
         print("La matriz puede ser singular (no tener solución única).")
