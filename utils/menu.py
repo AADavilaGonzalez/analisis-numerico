@@ -132,7 +132,7 @@ class Menu(Generic[T]):
         self.mostrar()
         self.seleccionar()
 
-    def desplegar_mientras(self, cond: Callable[[T], bool] = lambda _: False) -> None:
+    def desplegar_mientras(self, cond: Callable[[T], bool]) -> None:
         while cond(self.estado):
             self.mostrar()
             self.seleccionar()
