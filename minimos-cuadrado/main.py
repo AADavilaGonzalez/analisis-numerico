@@ -74,3 +74,5 @@ def main():
 
 if __name__ == '__main__':
     main()
+    print('\nPrograma elaborado por:')
+    print('Aldo Adrian Davila Gonzalez     1994122\nLuis Fernando Segobia Torres    2177528\nRoberto Sánchez Santoyo         2177547')
