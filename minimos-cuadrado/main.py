@@ -55,7 +55,10 @@ def main():
     
     x_predecida = float(input('\nIngrese la x a estimar en la recta aproximada> '))
 
-    print(f'El valor de {x_predecida} en la funcion es de aproximadamente {round(funcion(x_predecida),4)}')
+    cleaner()
+
+    print('\n***Resultados***')
+    print(f'\nEl valor de {x_predecida} en la funcion es de aproximadamente {round(funcion(x_predecida),4)}')
     print(f'Con un coeficiente de correlacion r = {round(correlacion_r, 4)}')
     input('\nDe enter para visualizar la grafica...')
 
