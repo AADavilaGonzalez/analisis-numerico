@@ -7,6 +7,8 @@ import math
 from typing import Callable
 from functools import lru_cache
 
+# <=========IMPLEMENTACION DE ALGORITMO DE DIFERENCIAS DIVIDIDAS============>
+
 def diferencias_divididas(
     X: np.ndarray,
     Y: np.ndarray,
@@ -126,10 +128,11 @@ if __name__ == "__main__":
             grafica.punto("", x, y, color="blue")
         grafica.mostrar()
 
+    @Menu.esperar_entrada
     def evaluar_aproximacion(estado: Estado):
         print("Valor de x a evaluar:")
         try:
-            x = float(input(">"))
+            x = float(input("> "))
         except:
             print("Formato Incorrecto!")
             return
