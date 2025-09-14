@@ -1,7 +1,7 @@
-from ..utils.equipo import *
-from ..utils.deps.np import *
-from ..utils.menu import *
-from ..utils.grafica import *
+from utils.equipo import *
+from utils.deps.np import *
+from utils.menu import *
+from utils.grafica import *
 
 import math
 from typing import Callable
@@ -50,6 +50,11 @@ if __name__ == "__main__":
         vista: Vista
         inicializado: bool = False
         corriendo: bool = True
+        puntos: list = None
+
+        def __post_init__(self):
+            if self.puntos is None:
+                self.puntos = []
     
     estado = Estado(
         X = np.zeros(0),
@@ -123,6 +128,10 @@ if __name__ == "__main__":
         )
         for x,y in zip(estado.X, estado.Y):
             grafica.punto("", x, y, color="blue")
+
+        for i, (x, y) in enumerate(estado.puntos):
+            grafica.punto('', x, y, color="red", marker="*", markersize = 10)
+
         grafica.mostrar()
 
     @Menu.esperar_entrada
@@ -130,6 +139,7 @@ if __name__ == "__main__":
         print("Valor de x a evaluar:")
         try:
             x = float(input("> "))
+            estado.puntos.append((x,estado.f(x)))
         except:
             print("Formato Incorrecto!")
             return
