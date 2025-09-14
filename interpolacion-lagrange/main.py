@@ -130,7 +130,7 @@ if __name__ == "__main__":
             grafica.punto("", x, y, color="blue")
 
         for i, (x, y) in enumerate(estado.puntos):
-            grafica.punto('', x, y, color="red", marker="*", markersize = 10)
+            grafica.punto('', x, y, color="red", marker=".", markersize = 10)
 
         grafica.mostrar()
 
