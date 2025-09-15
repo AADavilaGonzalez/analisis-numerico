@@ -1,7 +1,7 @@
-from utils.equipo import *
-from utils.deps.np import *
-from utils.menu import *
-from utils.grafica import *
+from ..utils.equipo import *
+from ..utils.deps.np import *
+from ..utils.menu import *
+from ..utils.grafica import *
 
 import math
 from typing import Callable
@@ -48,14 +48,10 @@ if __name__ == "__main__":
         Y: np.ndarray
         f: Callable[[float], float]
         vista: Vista
+        puntos: list[tuple]
         inicializado: bool = False
         corriendo: bool = True
-        puntos: list = None
 
-        def __post_init__(self):
-            if self.puntos is None:
-                self.puntos = []
-    
     estado = Estado(
         X = np.zeros(0),
         Y = np.zeros(0),
@@ -65,7 +61,8 @@ if __name__ == "__main__":
             math.nan,
             math.nan,
             math.nan
-        )
+        ), 
+        puntos = []
     )
 
     MARGEN = 0.1
@@ -110,6 +107,8 @@ if __name__ == "__main__":
             y_min-y_margen,
             y_max+y_margen
         )
+        
+        estado.puntos = []
 
         if not estado.inicializado:
             global menu
@@ -129,8 +128,8 @@ if __name__ == "__main__":
         for x,y in zip(estado.X, estado.Y):
             grafica.punto("", x, y, color="blue")
 
-        for i, (x, y) in enumerate(estado.puntos):
-            grafica.punto('', x, y, color="red", marker=".", markersize = 10)
+        for x, y in estado.puntos:
+            grafica.punto("", x, y, color="red")
 
         grafica.mostrar()
 
@@ -139,10 +138,10 @@ if __name__ == "__main__":
         print("Valor de x a evaluar:")
         try:
             x = float(input("> "))
-            estado.puntos.append((x,estado.f(x)))
         except:
             print("Formato Incorrecto!")
             return
+        estado.puntos.append((x,estado.f(x)))
         print(f"f(x) = {estado.f(x)}")
 
  

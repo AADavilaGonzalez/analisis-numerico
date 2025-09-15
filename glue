@@ -8,7 +8,6 @@ from typing import Callable
 from pathlib import Path
 from datetime import date
 
-CHUNK_SIZE = 4096
 FILE_SEPARATOR = "\n"
 IMPORT_PATTERN = re.compile(r"from\s+(\.+)(\S+)\s+import\s+\*\s*(?:#.*)?$")
 MAIN_PATTERN = re.compile(r"^if\s+__name__\s*==\s*\"__main__\"\s*:\s*$")
