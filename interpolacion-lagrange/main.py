@@ -48,7 +48,7 @@ if __name__ == "__main__":
         Y: np.ndarray
         f: Callable[[float], float]
         vista: Vista
-        puntos: list[tuple]
+        puntos: list[tuple[float,float]]
         inicializado: bool = False
         corriendo: bool = True
 
@@ -66,6 +66,26 @@ if __name__ == "__main__":
     )
 
     MARGEN = 0.1
+
+    def calcular_vista(estado: Estado) -> Vista:
+        X = list(estado.X) + [p[0] for p in estado.puntos]
+
+        min_x = min(X)
+        max_x = max(X)
+        margen_x = (max_x-min_x)*MARGEN
+
+        muestra_y = np.vectorize(estado.f)(np.linspace(min_x, max_x, 100))
+        min_y = min(muestra_y)
+        max_y = max(muestra_y)
+        margen_y = (max_y-min_y)*MARGEN
+
+        return Vista(
+            min_x-margen_x,
+            max_x+margen_x,
+            min_y-margen_y,
+            max_y+margen_y
+        )
+
 
     def ingresar_datos(estado: Estado):
         print("Ingrese los puntos para generar la aproximacion polinomial",
@@ -91,23 +111,7 @@ if __name__ == "__main__":
         estado.X = np.array(X)
         estado.Y = np.array(Y)
         estado.f = PolinomioLagrange(estado.X, estado.Y)
-
-        x_min = min(X)
-        x_max = max(X)
-        x_margen = (x_max-x_min)*MARGEN
-       
-        muestra_f = np.vectorize(estado.f)(np.linspace(x_min, x_max, 100))
-        y_min = min(muestra_f)
-        y_max = max(muestra_f)
-        y_margen = (y_max-y_min)*MARGEN
-
-        estado.vista = Vista(
-            x_min-x_margen,
-            x_max+x_margen,
-            y_min-y_margen,
-            y_max+y_margen
-        )
-        
+        estado.vista = calcular_vista(estado) 
         estado.puntos = []
 
         if not estado.inicializado:
@@ -128,7 +132,7 @@ if __name__ == "__main__":
         for x,y in zip(estado.X, estado.Y):
             grafica.punto("", x, y, color="blue")
 
-        for x, y in estado.puntos:
+        for x,y in estado.puntos:
             grafica.punto("", x, y, color="red")
 
         grafica.mostrar()
@@ -141,8 +145,10 @@ if __name__ == "__main__":
         except:
             print("Formato Incorrecto!")
             return
-        estado.puntos.append((x,estado.f(x)))
-        print(f"f(x) = {estado.f(x)}")
+        y = estado.f(x)
+        estado.puntos.append((x,y))
+        estado.vista = calcular_vista(estado)
+        print(f"f(x) = {y}")
 
  
     def salir(estado: Estado): estado.corriendo = False 

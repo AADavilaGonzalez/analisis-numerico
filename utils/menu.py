@@ -1,15 +1,8 @@
-import os
 from typing import Callable, TypeVar, Generic, Iterator
 
 __all__ = ["clear", "Accion", "Opcion", "Menu"]
 
-match os.name:
-    case "posix":
-        clear = lambda: os.system("clear")
-    case "nt":
-        clear = lambda: os.system("cls")
-    case _:
-        clear = lambda: None
+def clear(): print("\033[H\033[2J", end="", flush=True)
 
 T = TypeVar("T")
 
@@ -169,8 +162,6 @@ if __name__ == "__main__":
         pre = instrucciones
     )
 
-    import os
     while True:
-        os.system("clear")
         menu.mostrar()
         menu.seleccionar()
