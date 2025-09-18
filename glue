@@ -46,13 +46,12 @@ def functimer(f:Callable):
 
 
 def substitute_command(command: re.Match) -> str:
-    match command.group(1):
-        case "DATE":
-            return date.today().strftime("%d-%m-%Y")
-        case _:
-            raise ValueError(
-                f"unknown command: {command.group(1)}"
-            )
+    value = command.group(1)
+    if value == "DATE":
+        return date.today().strftime("%d-%m-%Y")
+    else:
+        raise ValueError(f"unknown command: {value}")
+
 
 def glue_file(file:Path) -> StringIO:
 
