@@ -1,12 +1,13 @@
+from .ansi import *
+
 from typing import Callable, TypeVar, Generic, Iterator
 
-__all__ = ["clear", "Accion", "Opcion", "Menu"]
-
-def clear(): print("\033[H\033[2J", end="", flush=True)
+__all__ = ["Accion", "Opcion", "Menu"]
 
 T = TypeVar("T")
 
-Accion = Callable[[T], None]
+Accion = Callable[[T | None], None]
+noOp: Accion = lambda _ : None
 
 class Opcion(Generic[T]):
 
@@ -20,18 +21,39 @@ class Opcion(Generic[T]):
         self.accion = accion
         self.activa = activa
 
+    @staticmethod
+    def limpiar_pantalla(f: Accion[T]) -> Accion[T]:
+        def wrapper(estado: T | None) -> None:
+            clear()
+            f(estado)
+        return wrapper
+            
+    @staticmethod
+    def esperar_entrada(f: Accion[T]) -> Accion[T]:
+        def wrapper(estado: T | None) -> None:
+            f(estado)
+            input()
+        return wrapper
+
+    @staticmethod
+    def requerir_estado(f: Callable[[T], None]) -> Accion[T]:
+        def wrapper(estado: T | None) -> None:
+            assert estado is not None
+            f(estado)
+        return wrapper
+
 class Menu(Generic[T]):
 
     def __init__(self,
-        estado: T,
         opciones: list[Opcion[T]],
-        pre: Accion[T] | None = None,
-        pos: Accion[T] | None = None,
+        estado: T | None = None,
+        pre: Accion[T] = noOp,
+        pos: Accion[T] = noOp,
         clear: bool = True,
         indices: bool = True,
         sangria: int = 0,
         prompt: str = "> ",
-        val_inv: Accion[T] | None = None,
+        val_inv: Accion[T] = noOp,
         sol_conf: Callable[[list[Opcion[T]]], Accion[T]] | None = None
     ):
         self.estado = estado
@@ -49,33 +71,16 @@ class Menu(Generic[T]):
 
         self.prompt = prompt
 
-        self.val_inv = val_inv or type(self).__valor_invalido
+        self.val_inv = val_inv
         self.sol_conf = sol_conf or type(self).__solucionar_conflicto
 
     def __opciones_activas(self) -> Iterator[Opcion[T]]:
         return (op for op in self.opciones if op.activa)
 
     @staticmethod
-    def __valor_invalido(_: T) -> None:
-        return
-
-    @staticmethod
     def __solucionar_conflicto(opciones: list[Opcion[T]]) -> Accion[T]:
         return opciones[0].accion
 
-    @staticmethod
-    def limpiar_pantalla(f: Accion[T]) -> Accion[T]:
-        def wrapper(estado: T) -> None:
-            clear()
-            f(estado)
-        return wrapper
-            
-    @staticmethod
-    def esperar_entrada(f: Accion[T]) -> Accion[T]:
-        def wrapper(estado: T) -> None:
-            f(estado)
-            input()
-        return wrapper
 
     def mostrar(self) -> None:
         if self.clear: clear()
@@ -125,8 +130,8 @@ class Menu(Generic[T]):
         self.mostrar()
         self.seleccionar()
 
-    def desplegar_mientras(self, cond: Callable[[T], bool]) -> None:
-        while cond(self.estado):
+    def desplegar_mientras(self, cond: Callable[[],bool]) -> None:
+        while cond():
             self.mostrar()
             self.seleccionar()
 
@@ -143,22 +148,28 @@ if __name__ == "__main__":
 
     estado = Estado(0,0)
 
-    def instrucciones(estado:Estado) -> None:
+    @Opcion.requerir_estado
+    def instrucciones(estado) -> None:
         print("Primero lo primero y segundo lo segundo...")
         print(f"primero: {estado.primero}")
         print(f"segundo: {estado.segundo}")
 
+    @Opcion.requerir_estado
     def incrementar_primero(estado: Estado) -> None: estado.primero += 1
+    @Opcion.requerir_estado
     def decrementar_primero(estado: Estado) -> None: estado.primero -= 1
+    @Opcion.requerir_estado
     def incrementar_segundo(estado: Estado) -> None: estado.segundo += 1
+    @Opcion.requerir_estado
     def decrementar_segundo(estado: Estado) -> None: estado.segundo -= 1
 
-    menu = Menu(estado, [
-        Opcion("Incrementar primero", incrementar_primero),
-        Opcion("Decrementar primero", decrementar_primero),
-        Opcion("Incrementar segundo", incrementar_segundo),
-        Opcion("Decrementar segundo", decrementar_segundo)
+    menu = Menu([
+            Opcion("Incrementar primero", incrementar_primero),
+            Opcion("Decrementar primero", decrementar_primero),
+            Opcion("Incrementar segundo", incrementar_segundo),
+            Opcion("Decrementar segundo", decrementar_segundo)
         ],
+        estado = estado,
         pre = instrucciones
     )
 
