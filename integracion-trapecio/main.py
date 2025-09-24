@@ -50,24 +50,36 @@ if __name__ == "__main__":
         try:
             expr = sympy.sympify(input("f(x) = ").strip())
         except sympy.SympifyError as e:
-            print(f"Expresion Invalida:\n{e}")
-            input()
+            print(f"Expresion invalida:\n{e}")
             return
+
         if expr.free_symbols:
-            f = sympy.lambdify(x, expr, modules="numpy")
+            if expr.free_symbols == {x}:
+                f = sympy.lambdify(x, expr, modules="numpy")
+            else:
+                print("Ej. de f(x): x**2 - 2*x + 3.")
+                input()
+                return
         else:
-            f = lambda x: np.full_like(
-                    np.asarray(x),
-                    float(cast(float,expr)),
+            try:
+                val = float(cast(float, expr))
+                f = lambda x_val: np.full_like(
+                    np.asarray(x_val),
+                    val,
                     dtype="float"
                 )
+            except (ValueError, TypeError):
+                print("La expresion constante debe ser un numero valido.")
+                return
+
         if estado:
             estado.expr = expr
             estado.f = f
         else:
-            menu.estado = Estado(expr, f)
+            menu.estado = estado_nuevo = Estado(expr, f)
             for opcion in menu.opciones:
                 opcion.activa = True
+
 
     @Opcion.esperar_entrada
     @Opcion.requerir_estado
