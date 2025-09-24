@@ -6,7 +6,7 @@ from ..utils.deps.sympy import *
 
 #<==============Implementacion de la regla del trapecio==================>
 
-from typing import Callable
+from typing import Callable, cast
 
 def integral_definida(
     f: Callable[[np.ndarray], np.ndarray],
@@ -23,8 +23,8 @@ def integral_definida(
     )
     if a == b: return 0
     if a > b: a,b = b,a
-    y = f(np.linspace(a, b, n+1))
-    return ((b-a)/n)*(y[1:-1].sum()+(y[-1]+y[1])/2)
+    y = f(np.linspace(a, b, n+1, dtype="float"))
+    return ((b-a)/n)*(y[1:-1].sum()+(y[-1]+y[0])/2)
 
 if __name__ == "__main__":
 
@@ -48,12 +48,19 @@ if __name__ == "__main__":
         global menu
         x = sympy.symbols("x")
         try:
-            expr = sympy.sympify(input(menu.prompt).strip())
+            expr = sympy.sympify(input("f(x) = ").strip())
         except sympy.SympifyError as e:
             print(f"Expresion Invalida:\n{e}")
             input()
             return
-        f = sympy.lambdify(x, expr, modules="numpy")
+        if expr.free_symbols:
+            f = sympy.lambdify(x, expr, modules="numpy")
+        else:
+            f = lambda x: np.full_like(
+                    np.asarray(x),
+                    float(cast(float,expr)),
+                    dtype="float"
+                )
         if estado:
             estado.expr = expr
             estado.f = f
@@ -77,7 +84,7 @@ if __name__ == "__main__":
     @Opcion.requerir_estado
     def modificar_particiones(estado: Estado):
         try:
-            n = int(input(menu.prompt))
+            n = int(input("n = "))
         except ValueError:
             print("Introduzca un entero")
             input()
