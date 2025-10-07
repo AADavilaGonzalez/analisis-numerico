@@ -1,4 +1,4 @@
-from ...utils.titulo import *
+from ...utils.equipo import *
 from ...utils.ansi import *
 from ...utils.menu import *
 from ...utils.deps.np import *
@@ -16,25 +16,26 @@ def integral_definida(
 ) -> float:
     """
     Realiza la integral definida de una funcion de 'a' a 'b'
-    utilizando la regla de simpson tres octavos compuesta
+    utilizando la regla de boole compuesta
     """
-    if n < 3: raise ValueError(
-        "el numero de particiones debe ser mayor o igual a 3"
+    if n < 4: raise ValueError(
+        "el numero de particiones debe ser mayor o igual a 4"
     )
-    if n % 3 != 0: raise ValueError(
-        "el numero de particiones debe ser divisible por 3"
+    if n % 4 != 0: raise ValueError(
+        "el numero de particiones debe ser divisible por 4"
     )
 
     if a == b: return 0
     if a > b: a,b = b,a
 
     y = f(np.linspace(a, b, n+1, dtype="float"))
-    return ((3*(b-a))/(8*n))*(
-        y[0] +
-        3*y[1:-1:3].sum() +
-        3*y[2:-1:3].sum() +
-        2*y[3:-1:3].sum() +
-        y[-1]
+    return (2*(b-a)/(45*n))*(
+        7*y[0] +
+        32*y[1:-1:4].sum() +
+        12*y[2:-1:4].sum() +
+        32*y[3:-1:4].sum() +
+        14*y[4:-1:4].sum() +
+        7*y[-1]
     )
 
 if __name__ == "__main__":
@@ -43,7 +44,7 @@ if __name__ == "__main__":
 
         _f: Callable[[np.ndarray], np.ndarray]
         _expr: str
-        _n: int = 99
+        _n: int = 100
 
         def __init__(self, f: str, n: int = 99):
             self.f = f
@@ -86,12 +87,12 @@ if __name__ == "__main__":
 
         @n.setter
         def n(self, val: int) -> None:
-            remainder = val % 3
-            self._n = val if remainder == 0 else val + (3 - remainder) 
+            remainder = val % 4
+            self._n = val if remainder == 0 else val + (4 - remainder) 
         
 
     def estatus(estado: Estado | None):
-        print("Calculadora de Integrales: Regla de Simpson 3/8")
+        print("Calculadora de Integrales: Regla de Boole")
         if estado is None: return
         print(
             f"f(x) = {estado.expr}",
@@ -138,10 +139,10 @@ if __name__ == "__main__":
             print("Introduzca un entero positivo")
             input()
             return
-        remainder = n % 3
+        remainder = n % 4
         if remainder != 0:
-            n += (3 - remainder)
-            print("Indice ajustado, debe ser divisible por 3")
+            n += (4 - remainder)
+            print("Indice ajustado, debe ser divisible por 4")
             input()
         estado.n = n
 
