@@ -4,7 +4,6 @@ Luis Fernando Segobia Torres    2177528
 Roberto Sánchez Santoyo         2177547
 '''
 
-import re
 try:
     import numpy as np
 except ImportError:

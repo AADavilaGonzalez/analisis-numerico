@@ -1,8 +1,8 @@
-from ..utils.equipo import *
-from ..utils.ansi import *
-from ..utils.menu import *
-from ..utils.deps.np import *
-from ..utils.deps.sympy import *
+from ...utils.equipo import *
+from ...utils.ansi import *
+from ...utils.menu import *
+from ...utils.deps.np import *
+from ...utils.deps.sympy import *
 
 #<==============Implementacion de la regla del trapecio==================>
 
@@ -76,7 +76,7 @@ if __name__ == "__main__":
             estado.expr = expr
             estado.f = f
         else:
-            menu.estado = estado_nuevo = Estado(expr, f)
+            menu.estado = Estado(expr, f)
             for opcion in menu.opciones:
                 opcion.activa = True
 

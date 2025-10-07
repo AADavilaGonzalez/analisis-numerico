@@ -1,4 +1,4 @@
-from ..utils.tabla import *
+from ...utils.tabla import *
 
 import math
 from typing import Callable

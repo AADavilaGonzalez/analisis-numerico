@@ -1,10 +1,10 @@
-from ..utils.titulo import *
-from ..utils.ansi import *
-from ..utils.menu import *
-from ..utils.deps.np import *
-from ..utils.deps.sympy import *
+from ...utils.titulo import *
+from ...utils.ansi import *
+from ...utils.menu import *
+from ...utils.deps.np import *
+from ...utils.deps.sympy import *
 
-#<==============Implementacion de la regla simpson un tercio==================>
+#<==============Implementacion de la regla simpson tres octavos==================>
 
 from typing import Callable
 
@@ -16,23 +16,24 @@ def integral_definida(
 ) -> float:
     """
     Realiza la integral definida de una funcion de 'a' a 'b'
-    utilizando la regla de simpson un tercio compuesta
+    utilizando la regla de simpson tres octavos compuesta
     """
     if n < 2: raise ValueError(
         "el numero de particiones debe ser mayor o igual a 2"
     )
-    if n % 2 == 1: raise ValueError(
-        "el numero de particiones debe ser un numero par"
+    if n % 3 != 0: raise ValueError(
+        "el numero de particiones debe ser divisible por 3"
     )
 
     if a == b: return 0
     if a > b: a,b = b,a
 
     y = f(np.linspace(a, b, n+1, dtype="float"))
-    return ((b-a)/(3*n))*(
+    return ((3*(b-a))/(8*n))*(
         y[0] +
-        4*y[1:-1:2].sum() +
-        2*y[2:-1:2].sum() +
+        3*y[1:-1:3].sum() +
+        3*y[2:-1:3].sum() +
+        2*y[3:-1:3].sum() +
         y[-1]
     )
 
@@ -42,9 +43,9 @@ if __name__ == "__main__":
 
         _f: Callable[[np.ndarray], np.ndarray]
         _expr: str
-        _n: int = 100
+        _n: int = 99
 
-        def __init__(self, f: str, n: int = 100):
+        def __init__(self, f: str, n: int = 99):
             self.f = f
             self.n = n
 
@@ -85,11 +86,12 @@ if __name__ == "__main__":
 
         @n.setter
         def n(self, val: int) -> None:
-            self._n = val if val % 2 == 0 else val+1 
+            remainder = val % 3
+            self._n = val if remainder == 0 else val + (3 - remainder) 
         
 
     def estatus(estado: Estado | None):
-        print("Calculadora de Integrales: Regla de Simpson 1/3")
+        print("Calculadora de Integrales: Regla de Simpson 3/8")
         if estado is None: return
         print(
             f"f(x) = {estado.expr}",
@@ -136,9 +138,10 @@ if __name__ == "__main__":
             print("Introduzca un entero positivo")
             input()
             return
-        if n % 2 == 1:
-            n += 1
-            print("Indice aumentado en uno, debe ser par")
+        remainder = n % 3
+        if remainder != 0:
+            n += (3 - remainder)
+            print("Indice ajustado, debe ser divisible por 3")
             input()
         estado.n = n
 

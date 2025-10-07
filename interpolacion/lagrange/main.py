@@ -1,7 +1,7 @@
-from ..utils.equipo import *
-from ..utils.deps.np import *
-from ..utils.menu import *
-from ..utils.grafica import *
+from ...utils.equipo import *
+from ...utils.deps.np import *
+from ...utils.menu import *
+from ...utils.grafica import *
 
 import math
 from typing import Callable

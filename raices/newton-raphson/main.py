@@ -1,5 +1,5 @@
-from ..utils.importar import *
-from ..utils.tabla import *
+from ...utils.tabla import *
+from ...utils.viejo.importar import *
 
 import math
 from typing import Callable, Iterator

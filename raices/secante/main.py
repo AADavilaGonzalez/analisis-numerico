@@ -1,6 +1,6 @@
-from ..utils.titulo import *
-from ..utils.tipos import *
-from ..utils.tabla import *
+from ...utils.titulo import *
+from ...utils.tabla import *
+from ...utils.viejo.tipos import *
 
 #DESCRIPCION: programa para calcular las raices reales de dos
 # funciones por medio del metodo del la secante modificada

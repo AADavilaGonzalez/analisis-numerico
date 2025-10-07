@@ -1,7 +1,7 @@
-from ..utils.equipo import *
-from ..utils.menu import *
-from ..utils.tabla import *
-from ..utils.rutinas import *
+from ...utils.equipo import *
+from ...utils.menu import *
+from ...utils.tabla import *
+from ...utils.rutinas import *
 
 try:
     import numpy as np
@@ -132,6 +132,7 @@ if __name__ == "__main__":
 
 
     def es_inicializador(f: Accion[Estado]) -> Accion[Estado]:
+        @Opcion.requerir_estado
         def wrapper(estado: Estado):
             f(estado)
             if not estado.inicializado:
@@ -156,8 +157,9 @@ if __name__ == "__main__":
         print(vec_var + f" = {vec_fmt(v)}", **kwargs)
 
 
-    @Menu.esperar_entrada
+    @Opcion.esperar_entrada
     @es_inicializador
+    @Opcion.requerir_estado
     def cargar_gauss_seidel(estado: Estado):
         estado.sistema.coef = np.array([
             [5, -3, 1],
@@ -175,25 +177,28 @@ if __name__ == "__main__":
         print("\nGauss-Seidel cargado exitosamente")
 
     
-    @Menu.esperar_entrada
+    @Opcion.esperar_entrada
     @es_inicializador
+    @Opcion.requerir_estado
     def cargar_relajacion(estado: Estado):
         cargar_gauss_seidel(estado)
         estado.w = 1.1
         print("\nGauss-Seidel con relajacion cargado exitosamente")
 
    
-    menu_ejemplos = Menu(estado, [
+    menu_ejemplos = Menu([
            Opcion("Gauss-Seidel", cargar_gauss_seidel),
            Opcion("Gauss-Seidel con Relajacion", cargar_relajacion),
            Opcion("Cancelar", lambda _: None)
         ],
+        estado = estado,
         pre=lambda _: print("Elija el ejemplo de clase a cargar:\n"), 
     )
 
 
-    @Menu.esperar_entrada
-    @Menu.limpiar_pantalla
+    @Opcion.esperar_entrada
+    @Opcion.limpiar_pantalla
+    @Opcion.requerir_estado
     def modificar_ecuacion(estado: Estado):
 
         print("Introduzca el indice de la ecuacion que desea modificar")
@@ -231,8 +236,9 @@ if __name__ == "__main__":
         print(f"\nEcuacion {i+1} modificada exitosamente")
     
 
-    @Menu.esperar_entrada
-    @Menu.limpiar_pantalla
+    @Opcion.esperar_entrada
+    @Opcion.limpiar_pantalla
+    @Opcion.requerir_estado
     def modificar_constantes(estado: Estado):
 
         print_sistema(estado.sistema)
@@ -253,8 +259,9 @@ if __name__ == "__main__":
         print("\nConstantes del estado modificados exitosamente")
 
 
-    @Menu.esperar_entrada
-    @Menu.limpiar_pantalla
+    @Opcion.esperar_entrada
+    @Opcion.limpiar_pantalla
+    @Opcion.requerir_estado
     def modificar_val_init(estado: Estado):
 
         print("Valor Inicial: " + str_vector(estado.x0.tolist()))
@@ -276,8 +283,9 @@ if __name__ == "__main__":
         print("\nValor inicial modificado exitosamente")
 
 
-    @Menu.esperar_entrada
-    @Menu.limpiar_pantalla
+    @Opcion.esperar_entrada
+    @Opcion.limpiar_pantalla
+    @Opcion.requerir_estado
     def modificar_w(estado: Estado):
         print(f"Parametro de Relajacion: {estado.w:.2f}")
         
@@ -295,15 +303,17 @@ if __name__ == "__main__":
         print("Parametro de relajacion modificado exitosamente")
 
 
-    menu_modificacion = Menu(estado, [
+    menu_modificacion = Menu([
             Opcion("Modificar Ecuacion", modificar_ecuacion),
             Opcion("Modificar Constantes", modificar_constantes),
             Opcion("Modificar Valor Inicial", modificar_val_init),
             Opcion("Modificar Parametro 'w'", modificar_w)
         ],
+        estado = estado,
         pre=lambda _: print("Elija el aspecto que desea modificar:\n"),
     )
 
+    @Opcion.requerir_estado
     def mensaje(estado: Estado):
         print("Solucionador de estados lineales iterativo:",
               "***Metodo de Relajacion***", sep="\n"
@@ -333,9 +343,10 @@ if __name__ == "__main__":
                       "directamente por gauss-seidel", end="\n\n")
 
 
-    @Menu.esperar_entrada
-    @Menu.limpiar_pantalla
+    @Opcion.esperar_entrada
+    @Opcion.limpiar_pantalla
     @es_inicializador
+    @Opcion.requerir_estado
     def cargar_sistema(estado: Estado):
         print(
             "Introduzca alguna de las siguientes instrucciones:",
@@ -381,8 +392,9 @@ if __name__ == "__main__":
         print("\nEl sistema ha sido cargado exitosamente")
 
 
-    @Menu.esperar_entrada
-    @Menu.limpiar_pantalla
+    @Opcion.esperar_entrada
+    @Opcion.limpiar_pantalla
+    @Opcion.requerir_estado
     def mostrar_proceso(estado: Estado) -> None:
         tabla = Tabla(*[f"x{i}" for i in range(1,estado.sistema.dim+1)])
         x = estado.x0.copy()
@@ -399,7 +411,7 @@ if __name__ == "__main__":
 
     def salir(estado: Estado): estado.corriendo = False
 
-    menu = Menu(estado, [
+    menu = Menu([
             Opcion(
                 "Cargar Sistema de Ecuaciones", 
                 cargar_sistema
@@ -418,9 +430,10 @@ if __name__ == "__main__":
                 "Cargar Ejemplos de Clase",
                 lambda _: menu_ejemplos.desplegar(),
             ),
-            Opcion("Salir", salir)
+            Opcion("Salir", lambda _: exit())
         ],
-        pre=mensaje,
+        estado=estado,
+        pre=mensaje
     )
     
-    menu.desplegar_mientras(lambda estado: estado.corriendo == True)
+    while True: menu.desplegar()

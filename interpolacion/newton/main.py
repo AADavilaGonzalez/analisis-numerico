@@ -1,7 +1,7 @@
-from ..utils.equipo import *
-from ..utils.deps.np import *
-from ..utils.menu import *
-from ..utils.grafica import *
+from ...utils.equipo import *
+from ...utils.deps.np import *
+from ...utils.menu import *
+from ...utils.grafica import *
 
 import math
 from typing import Callable
@@ -53,7 +53,6 @@ if __name__ == "__main__":
         f: Callable[[float], float]
         vista: Vista
         inicializado: bool = False
-        corriendo: bool = True
     
     estado = Estado(
         X = np.zeros(0),
@@ -69,6 +68,7 @@ if __name__ == "__main__":
 
     MARGEN = 0.1
 
+    @Opcion.requerir_estado
     def ingresar_datos(estado: Estado):
         print("Ingrese los puntos para generar la aproximacion polinomial",
               "Utilice el siguiente formato: x,y | ej. 1,-2",
@@ -115,6 +115,7 @@ if __name__ == "__main__":
             estado.inicializado = True
 
 
+    @Opcion.requerir_estado
     def graficar_aproximacion(estado: Estado):
         print("Desplegando Grafica de la Aproximacion Calculada",
               "Cierre la grafica para continuar...", sep="\n")
@@ -128,7 +129,9 @@ if __name__ == "__main__":
             grafica.punto("", x, y, color="blue")
         grafica.mostrar()
 
-    @Menu.esperar_entrada
+
+    @Opcion.esperar_entrada
+    @Opcion.requerir_estado
     def evaluar_aproximacion(estado: Estado):
         print("Valor de x a evaluar:")
         try:
@@ -138,9 +141,8 @@ if __name__ == "__main__":
             return
         print(f"f(x) = {estado.f(x)}")
 
- 
-    def salir(estado: Estado): estado.corriendo = False 
-   
+
+    @Opcion.requerir_estado
     def imprimir_menu_principal(estado: Estado):
         print("Aproximador de Funciones Mediante Metodo de Diferencias Finitas")
         if estado.inicializado:
@@ -148,14 +150,15 @@ if __name__ == "__main__":
                 f"({x},{y})" for x,y in zip(estado.X, estado.Y)
             )}]")
 
-    menu = Menu(estado, [
+    menu = Menu([
             Opcion("Ingresar Conjunto de Datos", ingresar_datos),
             Opcion("Graficar Aproximacion", graficar_aproximacion, activa=False),
             Opcion("Evaluar Aproximacion", evaluar_aproximacion, activa=False),
-            Opcion("Salir", salir)
+            Opcion("Salir", lambda _: exit())
         ],
+        estado = estado,
         pre=imprimir_menu_principal
     )
 
-    menu.desplegar_mientras(lambda estado: estado.corriendo)
+    while True: menu.desplegar()
 

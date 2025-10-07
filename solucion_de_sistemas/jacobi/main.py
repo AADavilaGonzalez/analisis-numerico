@@ -1,6 +1,7 @@
-from ..utils.titulo import *
-from ..utils.menu import *
-from ..utils.rutinas import *
+from ...utils.titulo import *
+from ...utils.ansi import *
+from ...utils.menu import *
+from ...utils.rutinas import *
 
 try:
     import numpy as np
@@ -71,7 +72,7 @@ if __name__ == "__main__":
 
     sistema = SistemaLineal(np.empty(0), np.empty(0), np.empty(0), 0, False)
 
-
+    @Opcion.requerir_estado
     def mensaje(sistema: SistemaLineal):
         print("Solucionador de sistemas lineales iterativo: Metodo de Jacobi")
         if sistema.inicializado:
@@ -98,8 +99,9 @@ if __name__ == "__main__":
                         " directamente por el metodo de Jacobi", end="\n\n")
 
 
-    @Menu.esperar_entrada
-    @Menu.limpiar_pantalla
+    @Opcion.esperar_entrada
+    @Opcion.limpiar_pantalla
+    @Opcion.requerir_estado
     def cargar_sistema(sistema: SistemaLineal):
         print(
             "Introduzca alguna de las siguientes instrucciones:",
@@ -147,8 +149,9 @@ if __name__ == "__main__":
         print("\nEl sistema ha sido cargado exitosamente")
 
 
-    @Menu.esperar_entrada
-    @Menu.limpiar_pantalla
+    @Opcion.esperar_entrada
+    @Opcion.limpiar_pantalla
+    @Opcion.requerir_estado
     def modificar_ecuacion(sistema: SistemaLineal):
 
         print("Introduzca el indice de la ecuacion que desea modificar")
@@ -186,8 +189,9 @@ if __name__ == "__main__":
         print(f"\nEcuacion {i+1} modificada exitosamente")
     
 
-    @Menu.esperar_entrada
-    @Menu.limpiar_pantalla
+    @Opcion.esperar_entrada
+    @Opcion.limpiar_pantalla
+    @Opcion.requerir_estado
     def modificar_constantes(estado: SistemaLineal):
 
         print(str_sistema_lineal(
@@ -213,8 +217,9 @@ if __name__ == "__main__":
         print("\nConstantes del sistema modificados exitosamente")
 
 
-    @Menu.esperar_entrada
-    @Menu.limpiar_pantalla
+    @Opcion.esperar_entrada
+    @Opcion.limpiar_pantalla
+    @Opcion.requerir_estado
     def modificar_val_init(estado: SistemaLineal):
 
         print("Valor Inicial: " + str_vector(estado.x0.tolist()))
@@ -240,13 +245,14 @@ if __name__ == "__main__":
         clear()
         exit()
 
-    menu = Menu(sistema, [
+    menu = Menu([
             Opcion("Cargar Sistema", cargar_sistema),
             Opcion("Modificar Ecuacion", modificar_ecuacion, activa=False),
             Opcion("Modificar Constantes", modificar_constantes, activa=False),
             Opcion("Modificar Punto Inicial", modificar_val_init, activa=False),
             Opcion("Salir", salir)
         ],
+        estado = sistema,
         pre=mensaje
     )
 

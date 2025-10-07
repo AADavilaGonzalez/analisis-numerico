@@ -1,6 +1,6 @@
-from ..utils.titulo import *
-from ..utils.tabla import *
-from ..utils.grafica import *
+from ...utils.titulo import *
+from ...utils.tabla import *
+from ...utils.grafica import *
 
 try:
     import numpy as np
@@ -106,21 +106,26 @@ if __name__ == "__main__":
     f2 = lambda x,y: y + 3*x*(y**2) - 57
 
     grafica = Grafica(
-        xmin = -2, xmax = 6,
-        ymin = -4, ymax = 4,
-        res = 50, dt = 2
+        Vista(
+            x_min = -2,
+            x_max = 6,
+            y_min=-4,
+            y_max=4
+        ),
+        res = 50,
+        dt = 2
     )
 
     grafica.cuadricula()
     grafica.ejes()
 
     grafica.ecuacion_implicita("f1", f1,
-        xmin=-2, xmax=6, ymin=-4, ymax=4,
+        Vista(x_min=-2, x_max=6, y_min=-4, y_max=4),
         color="blue"
     )
 
     grafica.ecuacion_implicita("f2", f2,
-        xmin=-2, xmax=6, ymin=-4, ymax=4,
+        Vista(x_min=-2, x_max=6, y_min=-4, y_max=4),
         color="red"
     )
 
