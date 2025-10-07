@@ -4,7 +4,7 @@ from ..utils.menu import *
 from ..utils.deps.np import *
 from ..utils.deps.sympy import *
 
-#<==============Implementacion de la regla del trapecio==================>
+#<==============Implementacion de la regla simpson un tercio==================>
 
 from typing import Callable
 
@@ -88,10 +88,10 @@ if __name__ == "__main__":
             self._n = val if val % 2 == 0 else val+1 
         
 
-    def status(estado: Estado | None):
+    def estatus(estado: Estado | None):
+        print("Calculadora de Integrales: Regla de Simpson 1/3")
         if estado is None: return
         print(
-            "Calculadora de Integrales: Regla de Simpson 1/3",
             f"f(x) = {estado.expr}",
             f"n = {estado.n}",
             sep="\n"
@@ -151,7 +151,7 @@ if __name__ == "__main__":
         Opcion("Evaluar Integral", evaluar_integral, activa = False),
         Opcion("Modificar No. Particiones", modificar_particiones, activa=False),
         Opcion("Salir", salir)],
-        pre = status
+        pre = estatus
     )
 
     altscreen(True)
