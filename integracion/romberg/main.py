@@ -6,6 +6,8 @@ from ...utils.menu import *
 
 from typing import Callable
 
+#<=====Implementacion del metodo de Romberg para la integracion numerica=====>
+
 def integral_definida(
     f : Callable[[np.ndarray], np.ndarray],
     a : float,
@@ -20,11 +22,6 @@ def integral_definida(
         raise ValueError("El numero de iteraciones debe ser mayor o igual a 1")
 
     if a == b: return 0
-
-    signo = 1.0
-    if a > b:
-        signo = -1.0
-        a,b = b,a
 
     def regla_del_trapecio(n : int) -> float:
         h = (b-a)/n
@@ -42,7 +39,7 @@ def integral_definida(
         for i in range(j,k):
             R[i,j] = (p*R[i,j-1]-R[i-1,j-1])/(p-1)
 
-    return signo*R[k-1, k-1]
+    return R[k-1, k-1]
 
 
 if __name__ == "__main__":
@@ -126,7 +123,6 @@ if __name__ == "__main__":
         except ValueError as e:
             print(e)
             input()
-            return
 
     @Opcion.esperar_entrada
     @Opcion.requerir_estado

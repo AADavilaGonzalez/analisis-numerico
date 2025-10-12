@@ -1,6 +1,8 @@
 # Poject Specific
 entrega_*
 entrega-*
+prueba_*
+prueba-*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
