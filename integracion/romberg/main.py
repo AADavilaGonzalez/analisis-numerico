@@ -17,22 +17,28 @@ def integral_definida(
     """
     Implementacion del metodo de integracion de Romberg con iteraciones 'k' variable
     """
-   
+
+    #Checamos que tenga un numero de iteraciones validos
     if k < 1:
         raise ValueError("El numero de iteraciones debe ser mayor o igual a 1")
 
     if a == b: return 0
 
+    #Utilizamos la regla del trapecio compuesta para calculos base
     def regla_del_trapecio(n : int) -> float:
         h = (b-a)/n
         y = f(np.linspace(a, b, n+1, dtype=float))
         return h*(y[1:-1].sum() + (y[0]+y[-1])/2)
 
+    #Inicializamos la tabla de Romberg
     R = np.zeros((k,k), dtype=float)
 
+    #Generamos las aproximaciones iniciales en la primera columna de la tabla
     for i in range(k):
         R[i, 0] = regla_del_trapecio(2**i)
 
+    #Aplicamos extrapolacion de Richardson a los valores principales en un
+    #patron de matriz triangular inferior
     p = 1
     for j in range(1,k):
         p *= 4
