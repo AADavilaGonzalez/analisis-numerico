@@ -129,7 +129,6 @@ if __name__ == "__main__":
         expr: sympy.Expr
         f: Callable[[float, float], float]
         h: float = 0.1
-        vista: Vista | None = None
         X: list[float] | None = None
         Y: list[float] | None = None
         puntos: list[tuple[float, float]] | None = None
@@ -293,6 +292,7 @@ if __name__ == "__main__":
                 ])
             sub.desplegar()
 
+
     @Opcion.requerir_estado
     def cargar_grafica(estado: Estado):
         try:
@@ -318,16 +318,14 @@ if __name__ == "__main__":
             return
 
 
-        if estado.vista is None:
-            x_min, x_max = a, b
-            y_vals = np.concatenate([Y for _, Y in resultados.values()])
-            y_min, y_max = np.min(y_vals), np.max(y_vals)
-            margen_y = (y_max - y_min) * 0.1
-            estado.vista = Vista(x_min, x_max, y_min - margen_y, y_max + margen_y)
+        y_vals = np.concatenate([Y for _, Y in resultados.values()])
+        y_min, y_max = np.min(y_vals), np.max(y_vals)
+        margen_y = (y_max - y_min) * 0.1
+        vista = Vista(a, b, y_min - margen_y, y_max + margen_y)
 
         print("\nMostrando gráfica con métodos y solución analítica...")
         print("Cierre la gráfica para continuar.")
-        grafica = Grafica(estado.vista)
+        grafica = Grafica(vista)
 
         for metodo, (X, Y) in resultados.items():
             nombre_legible = titulo_metodo(metodo) 
@@ -371,6 +369,8 @@ if __name__ == "__main__":
         grafica._ax.legend()
         grafica.mostrar()
 
+
+    @es_inicializador
     def cargar_ejemplo() -> tuple[sympy.Expr, Funcion] | None:
         ejs = [
             "-2x^3 + 12x^2 - 20x + 8.5",
