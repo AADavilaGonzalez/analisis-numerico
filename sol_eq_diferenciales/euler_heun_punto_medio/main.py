@@ -1,6 +1,7 @@
 from ...utils.equipo import *
 from ...utils.ansi import *
 from ...utils.menu import *
+from ...utils.tabla import *
 from ...utils.deps.np import *
 from ...utils.deps.sympy import *
 
@@ -180,8 +181,7 @@ if __name__ == "__main__":
         return wrapper
 
 
-    @es_inicializador
-    def introducir_funcion() -> tuple[sympy.Expr, Funcion] | None:
+    def entrada_funcion() -> tuple[sympy.Expr, Funcion] | None:
         try:
             expr = parsear(input("f(x,y) = ").strip())
         except sympy.SympifyError as e:
@@ -207,8 +207,9 @@ if __name__ == "__main__":
 
         return expr, f
 
+    introducir_derivada = es_inicializador(entrada_funcion)
 
-    @Opcion.esperar_entrada
+
     @Opcion.requerir_estado
     def resolver_edo(estado: Estado):
         print( f"Ecuacion diferencial : dy/dx = {estado.expr}")
@@ -224,26 +225,23 @@ if __name__ == "__main__":
         except ValueError:
             print("Introduzca valores numericos!")
             return 
-       
+     
+        tabla = Tabla("x", "y")
+
         metodos_activos = [
             m for m, activo in estado.metodos.items() if activo
         ]
         for metodo in metodos_activos:
-            x_vals, y_vals = solucionar_edo(metodo,
-                estado.f, a, b, Punto(x,y), estado.h)
-
-            print(f"Metodo de {titulo_metodo(metodo)}", end="\n")
-            print(f"Resultado: y({b}) ≈ {y_vals[-1]:.6f}")
-            print(f"\nPrimeros y ultimos valores:")
-            print(f"x={x_vals[0]:.4f}, y={y_vals[0]:.6f}")
-            if len(x_vals) > 1:
-                print(f"x={x_vals[1]:.4f}, y={y_vals[1]:.6f}")
-            if len(x_vals) > 2:
-                print("...")
-                print(f"x={x_vals[-2]:.4f}, y={y_vals[-2]:.6f}")
-            print(f"x={x_vals[-1]:.4f}, y={y_vals[-1]:.6f}")
-            print("\n")
-
+            X, Y = solucionar_edo(
+                metodo, estado.f, a, b, Punto(x,y), estado.h
+            )
+            print(
+                "",
+                "Metodo de " + titulo_metodo(metodo),
+                tabla.encabezado(), sep="\n"
+            )
+            for xi, yi in zip(X,Y): print(tabla.fila(xi,yi))
+            input()
 
     @Opcion.requerir_estado
     def modificar_paso(estado: Estado): 
@@ -263,28 +261,30 @@ if __name__ == "__main__":
     @Opcion.requerir_estado
     def modificar_metodos(estado: Estado):
 
-        flag = False
+        continuar = True
         def regresar():
-            nonlocal flag
-            flag = True
+            nonlocal continuar
+            continuar = False
 
-        def accion_metodo(activo: bool) -> str:
-            return "Desactivar" if activo else "Activar"
-
-        def alternar_metodo(metodos: dict[Metodo, bool], metodo: Metodo):
+        def alternar_metodo(metodos: dict[Metodo, bool], metodo: Metodo, *_):
             if metodos[metodo]: metodos[metodo] = False
             else: metodos[metodo] = True
 
         opciones = [
-            Opcion(
-                f"{accion_metodo(activo)} Metodo de {titulo_metodo(metodo)}",
-                lambda _: alternar_metodo(estado.metodos, metodo)
-            )
-            for metodo, activo in estado.metodos.items()
+            Opcion("", partial(alternar_metodo, estado.metodos, metodo))
+            for metodo in estado.metodos
         ]
         opciones.append(Opcion("Regresar", lambda _: regresar()))
+        sub = Menu(opciones)
 
-        Menu(opciones).desplegar_mientras(lambda: flag == False)
+        while continuar:
+            for opcion, metodo, activo in zip(
+            sub.opciones, estado.metodos, estado.metodos.values()):
+                opcion.nombre = " ".join([
+                    "Desactivar" if activo else "Activar",
+                    "Metodo de", titulo_metodo(metodo)
+                ])
+            sub.desplegar()
 
 
     @es_inicializador
@@ -292,7 +292,8 @@ if __name__ == "__main__":
 
         ejs = [
             "-2x^3 + 12x^2 - 20x + 8.5",
-            "4exp(0.8x) - 0.5y"
+            "4exp(0.8x) - 0.5y",
+            "x + y",
         ]
 
         exprs = [parsear(ej) for ej in ejs] 
@@ -318,12 +319,11 @@ if __name__ == "__main__":
         return expr_final, f_final
 
 
-    def salir(_):
-        altscreen(False)
-        exit()
+    def salir(_): exit()
+
 
     menu = Menu([
-        Opcion("Introducir Derivada", introducir_funcion),
+        Opcion("Introducir Derivada", introducir_derivada),
         Opcion("Resolver EDO", resolver_edo, activa = False),
         Opcion("Modificar Tamaño de Paso", modificar_paso, activa=False),
         Opcion("Modificar Metodos", modificar_metodos, activa=False),
@@ -332,5 +332,4 @@ if __name__ == "__main__":
         pre = status
     )
 
-    altscreen(True)
     while True: menu.desplegar()
