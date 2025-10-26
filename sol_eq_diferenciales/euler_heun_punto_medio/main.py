@@ -4,12 +4,15 @@ from ...utils.menu import *
 from ...utils.tabla import *
 from ...utils.deps.np import *
 from ...utils.deps.sympy import *
+from ...utils.grafica import *
 
 #<==============Implementacion del metodo de Euler para EDOs==================>
 
 import math
 from typing import Callable, NamedTuple, cast
 from functools import partial
+import sympy
+import numpy as np
 
 Funcion = Callable[[float, float], float]
 
@@ -118,14 +121,18 @@ def solucionar_edo(
     return X, Y
 
 if __name__ == "__main__":
-
     from dataclasses import dataclass
+
     @dataclass
     class Estado:
         metodos: dict[Metodo, bool]
         expr: sympy.Expr
         f: Callable[[float, float], float]
         h: float = 0.1
+        vista: Vista | None = None
+        X: list[float] | None = None
+        Y: list[float] | None = None
+        puntos: list[tuple[float, float]] | None = None
 
     def status(estado: Estado | None):
         if estado is None: return
@@ -286,10 +293,85 @@ if __name__ == "__main__":
                 ])
             sub.desplegar()
 
+    @Opcion.requerir_estado
+    def cargar_grafica(estado: Estado):
+        try:
+            a = float(input(
+                "Inicio del intervalo : a = "))
+            b = float(input(
+                "Fin del intervalo    : b = "))
+            token = input(
+                "Codicion Inicial     : x,y = ")
+            x, y = (float(val) for val in token.split(","))
+            p0 = Punto(x,y)
+        except ValueError:
+            print("Introduzca valores numericos!")
+            return
 
-    @es_inicializador
+        resultados = {}
+        for metodo in estado.metodos.keys():
+            X, Y = solucionar_edo(metodo, estado.f, a, b, p0, estado.h)
+            resultados[metodo] = (X, Y)
+        if not resultados:
+            print("No hubo resultados validos para graficar")
+            input("Presione enter para continuar")
+            return
+
+
+        if estado.vista is None:
+            x_min, x_max = a, b
+            y_vals = np.concatenate([Y for _, Y in resultados.values()])
+            y_min, y_max = np.min(y_vals), np.max(y_vals)
+            margen_y = (y_max - y_min) * 0.1
+            estado.vista = Vista(x_min, x_max, y_min - margen_y, y_max + margen_y)
+
+        print("\nMostrando gráfica con métodos y solución analítica...")
+        print("Cierre la gráfica para continuar.")
+        grafica = Grafica(estado.vista)
+
+        for metodo, (X, Y) in resultados.items():
+            nombre_legible = titulo_metodo(metodo) 
+            grafica.curva(f"Método: {nombre_legible}", X, Y, linestyle="--", marker=".", label=f"Método de {nombre_legible}")
+
+        X_analitico = []
+        Y_analitico = []
+
+        try:
+            x_sym, y_sym = sympy.symbols('x y')
+            y_func = sympy.Function('y')
+            expr = sympy.sympify(estado.expr) if isinstance(estado.expr, str) else estado.expr
+
+            solution = sympy.dsolve(
+                y_func(x_sym).diff(x_sym) - expr.subs({y_sym: y_func(x_sym)}),
+                y_func(x_sym),
+                ics={y_func(p0.x): p0.y}
+            )
+
+            if isinstance(solution, list):
+                solution = solution[0]
+
+            if isinstance(solution, sympy.Equality):
+                sol_lambda = sympy.lambdify(x_sym, solution.rhs, 'numpy')
+                X_analitico = np.linspace(a, b, 200)
+                Y_analitico = np.real(sol_lambda(X_analitico))
+                grafica.curva(
+                    "Solucion real",
+                    X_analitico.tolist(),
+                    Y_analitico.tolist(),
+                    color="black",
+                    linewidth=2,
+                    label="Solucion real"
+                )
+            else:
+                print("No se pudo encontrar una solución analítica procesable.")
+
+        except Exception as e:
+            print(f"Advertencia: No se pudo calcular la solución analítica: {e}")
+
+        grafica._ax.legend()
+        grafica.mostrar()
+
     def cargar_ejemplo() -> tuple[sympy.Expr, Funcion] | None:
-
         ejs = [
             "-2x^3 + 12x^2 - 20x + 8.5",
             "4exp(0.8x) - 0.5y",
@@ -327,7 +409,8 @@ if __name__ == "__main__":
         Opcion("Resolver EDO", resolver_edo, activa = False),
         Opcion("Modificar Tamaño de Paso", modificar_paso, activa=False),
         Opcion("Modificar Metodos", modificar_metodos, activa=False),
-        Opcion("Cagar Ejemplo", cargar_ejemplo),
+        Opcion("Cargar graficas", cargar_grafica, activa=False),
+        Opcion("Cargar Ejemplo", cargar_ejemplo),
         Opcion("Salir", salir)],
         pre = status
     )

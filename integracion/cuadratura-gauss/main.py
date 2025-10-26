@@ -24,7 +24,7 @@ def integral_definida(
     if a == b: return 0
     if a > b: a,b = b,a
 
-    #Obtener los nodos y pesos para [-1, 1]
+    #Obtener los nodos y pesos para el intervalo [-1, 1]
     nodos, pesos = np.polynomial.legendre.leggauss(n)
 
     #cambio de variable para mapear los nodos al intervalo [a, b]
@@ -45,14 +45,14 @@ if __name__ == "__main__":
     class Estado:
         expr: sympy.Basic
         f: Callable[[np.ndarray], np.ndarray]
-        n: int = 5  
+        n: int = 5  #indicamos en primera instancia 5 puntos pero se pueden modificar posteriormente
 
     def status(estado: Estado | None):
         if estado is None: return
         print(
             "Calculadora de Integrales: Cuadratura de Gauss", 
             f"f(x) = {estado.expr}",
-            f"n = {estado.n} (puntos)",
+            f"n = {estado.n} puntos",
             sep="\n"
         ) 
 

@@ -33,6 +33,11 @@ class Grafica:
             self._obj[nombre].remove()
         self._obj[nombre] = obj
 
+    def curva(self, nombre: str, X: list[float], Y: list[float], **kwargs) -> None:
+        linea = self._ax.plot(X, Y, **kwargs)[0]
+        if nombre:
+            self.__remplazar(nombre, linea)
+
     def __init__(self, vista: Vista, res: int = 50, dt: int = 1
     ):
         self._vista = vista
