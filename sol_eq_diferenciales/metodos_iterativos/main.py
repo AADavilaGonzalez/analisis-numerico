@@ -40,6 +40,33 @@ def punto_medio(dydx: Funcion, p: Punto, h: float) -> Punto:
         p.y + dydx(p.x+h/2, y)*h
     )
 
+def runge_kutta_orden_2(dydx: Funcion, p: Punto, h: float) -> Punto:
+    k1 = dydx(p.x, p.y)
+    k2 = dydx(p.x+0.75*h, p.y+0.75*k1*h)
+    return Punto(
+        p.x + h,
+        p.y + (k1/3 + 2*k2/3)*h
+    )
+
+def runge_kutta_orden_3(dydx: Funcion, p: Punto, h: float) -> Punto:
+    k1 = dydx(p.x, p.y)
+    k2 = dydx(p.x+0.5*h, p.y+0.5*k1*h)
+    k3 = dydx(p.x+h, p.y-k1*h-2*k2*h)
+    return Punto(
+        p.x + h,
+        p.y + (k1+4*k2+k3)*h/6
+    )
+
+def runge_kutta_orden_4(dydx: Funcion, p: Punto, h: float) -> Punto:
+    k1 = dydx(p.x, p.y)
+    k2 = dydx(p.x+0.5*h, p.y+0.5*k1*h)
+    k3 = dydx(p.x+0.5*h, p.y+0.5*k2*h)
+    k4 = dydx(p.x+h, p.y+k3*h)
+    return Punto(
+        p.x + h,
+        p.y + (k1+2*k2+2*k3+k4)*h/6
+    )
+
 Metodo = Callable[[Funcion, Punto, float], Punto]
 
 def titulo_metodo(metodo: Metodo) -> str:
@@ -129,8 +156,6 @@ if __name__ == "__main__":
         expr: sympy.Expr
         f: Callable[[float, float], float]
         h: float = 0.1
-        X: list[float] | None = None
-        Y: list[float] | None = None
         puntos: list[tuple[float, float]] | None = None
 
     def status(estado: Estado | None):
@@ -179,7 +204,10 @@ if __name__ == "__main__":
                     {
                         euler       : True,
                         heun        : False,
-                        punto_medio : False
+                        punto_medio : False,
+                        runge_kutta_orden_2: False,
+                        runge_kutta_orden_3: False,
+                        runge_kutta_orden_4: False
                     }, expr, f
                 )
                 for opcion in menu.opciones:
