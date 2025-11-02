@@ -16,6 +16,7 @@ class Grafica:
 
     @classmethod
     def mostrar(cls, *args, **kwargs) -> None:
+        plt.ioff()
         plt.show(*args, **kwargs)
 
     @classmethod
@@ -47,6 +48,8 @@ class Grafica:
         self._res = res
         self._dt = dt
         self._obj = {}
+        plt.ion()
+        self._fig.show()
 
     def ejes(self, color="black", **kwargs) -> None:
         self._ax.axhline(0, color=color, **kwargs)
@@ -102,6 +105,7 @@ class Grafica:
 
     def actualizar(self) -> None:
         self._fig.canvas.draw()
+        plt.pause(self._dt)
 
     def eliminar_objeto(self, nombre: str) -> None:
         if nombre in self._obj:

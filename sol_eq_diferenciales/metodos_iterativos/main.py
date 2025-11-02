@@ -246,36 +246,108 @@ if __name__ == "__main__":
 
     @Opcion.requerir_estado
     def resolver_edo(estado: Estado):
-        print( f"Ecuacion diferencial : dy/dx = {estado.expr}")
-        print( f"Tamaño de paso       : h = {estado.h}")
+        print(f"Ecuación diferencial : dy/dx = {estado.expr}")
+        print(f"Tamaño de paso       : h = {estado.h}")
         try:
-            a = float(input(
-                "Inicio del intervalo : a = "))
-            b = float(input(
-                "Fin del intervalo    : b = "))
-            token = input(
-                "Codicion Inicial     : x,y = ")
+            a = float(input("Inicio del intervalo : a = "))
+            b = float(input("Fin del intervalo    : b = "))
+            token = input("Condición Inicial     : x,y = ")
             x, y = (float(val) for val in token.split(","))
         except ValueError:
-            print("Introduzca valores numericos!")
+            print("Introduzca valores numéricos")
             return 
-     
+
         tabla = Tabla("x", "y")
 
-        metodos_activos = [
-            m for m, activo in estado.metodos.items() if activo
-        ]
+        metodos_activos = [m for m, activo in estado.metodos.items() if activo]
+        if not metodos_activos:
+            print("No hay métodos activos.")
+            input("Presione Enter para continuar...")
+            return
+
+        resultados = {}
+        y_global_min = float("inf")
+        y_global_max = float("-inf")
+
+        # Calcula soluciones numéricas y almacena resultados
         for metodo in metodos_activos:
-            X, Y = solucionar_edo(
-                metodo, estado.f, a, b, Punto(x,y), estado.h
+            X, Y = solucionar_edo(metodo, estado.f, a, b, Punto(x, y), estado.h)
+            resultados[metodo] = (X, Y)
+            y_global_min = min(y_global_min, np.min(Y))
+            y_global_max = max(y_global_max, np.max(Y))
+
+        # Intentar solución analítica
+        X_analitico = None
+        Y_analitico = None
+        try:
+            x_sym, y_sym = sympy.symbols('x y')
+            y_func = sympy.Function('y')
+            expr = sympy.sympify(estado.expr) if isinstance(estado.expr, str) else estado.expr
+
+            solution = sympy.dsolve(
+                y_func(x_sym).diff(x_sym) - expr.subs({y_sym: y_func(x_sym)}),
+                y_func(x_sym),
+                ics={y_func(x): y}
             )
-            print(
-                "",
-                "Metodo de " + titulo_metodo(metodo),
-                tabla.encabezado(), sep="\n"
+
+            if isinstance(solution, sympy.Equality):
+                sol_lambda = sympy.lambdify(x_sym, solution.rhs, 'numpy')
+                X_analitico = np.linspace(a, b, 200)
+                Y_analitico = np.real(sol_lambda(X_analitico))
+                y_global_min = min(y_global_min, np.min(Y_analitico))
+                y_global_max = max(y_global_max, np.max(Y_analitico))
+        except Exception as e:
+            print(f"No se pudo calcular la solución real: {e}")
+
+        margen_y = (y_global_max - y_global_min) * 0.1
+        vista = Vista(a, b, y_global_min - margen_y, y_global_max + margen_y)
+
+        # Crear la gráfica solo una vez
+        grafica = Grafica(vista)
+        grafica.ejes()
+        grafica.cuadricula()
+        grafica.modo_interactivo(True)
+
+        # Dibujar solución analítica si existe
+        if X_analitico is not None and Y_analitico is not None:
+            grafica.curva(
+                "Solución analítica",
+                X_analitico.tolist(),
+                Y_analitico.tolist(),
+                color="black",
+                linewidth=2,
+                label="Solución real"
             )
-            for xi, yi in zip(X,Y): print(tabla.fila(xi,yi))
-            input()
+            grafica._ax.legend()
+            grafica.actualizar()
+
+        # Graficar cada método inmediatamente después de imprimir su tabla
+        for metodo, (X, Y) in resultados.items():
+            print("\n", f"Método de {titulo_metodo(metodo)}", tabla.encabezado(), sep="\n")
+            for xi, yi in zip(X, Y):
+                print(tabla.fila(xi, yi))
+
+            # Graficar este método inmediatamente
+            grafica.curva(
+                f"Método {titulo_metodo(metodo)}",
+                X.tolist(),
+                Y.tolist(),
+                linestyle="--",
+                marker="o",
+                label=f"Método {titulo_metodo(metodo)}"
+            )
+            grafica._ax.legend()
+            grafica.actualizar()
+
+            # Pausa para que el usuario vea el método
+            entrada = input("\nPresiona ENTER para mostrar el siguiente método (q para salir): ")
+            if entrada.lower() == "q":
+                break
+
+        print("\nListo, cierre la ventana para continuar")
+        Grafica.modo_interactivo(False)
+        Grafica.mostrar()
+        input()
 
     @Opcion.requerir_estado
     def modificar_paso(estado: Estado): 
