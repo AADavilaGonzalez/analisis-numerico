@@ -246,22 +246,22 @@ if __name__ == "__main__":
 
     @Opcion.requerir_estado
     def resolver_edo(estado: Estado):
-        print(f"Ecuación diferencial : dy/dx = {estado.expr}")
+        print(f"Ecuacion diferencial : dy/dx = {estado.expr}")
         print(f"Tamaño de paso       : h = {estado.h}")
         try:
             a = float(input("Inicio del intervalo : a = "))
             b = float(input("Fin del intervalo    : b = "))
-            token = input("Condición Inicial     : x,y = ")
+            token = input("Condicion inicial     : x,y = ")
             x, y = (float(val) for val in token.split(","))
         except ValueError:
-            print("Introduzca valores numéricos")
+            print("Introduzca valores numericos")
             return 
 
         tabla = Tabla("x", "y")
 
         metodos_activos = [m for m, activo in estado.metodos.items() if activo]
         if not metodos_activos:
-            print("No hay métodos activos.")
+            print("No hay metodos activos.")
             input("Presione Enter para continuar...")
             return
 
@@ -269,14 +269,12 @@ if __name__ == "__main__":
         y_global_min = float("inf")
         y_global_max = float("-inf")
 
-        # Calcula soluciones numéricas y almacena resultados
         for metodo in metodos_activos:
             X, Y = solucionar_edo(metodo, estado.f, a, b, Punto(x, y), estado.h)
             resultados[metodo] = (X, Y)
             y_global_min = min(y_global_min, np.min(Y))
             y_global_max = max(y_global_max, np.max(Y))
 
-        # Intentar solución analítica
         X_analitico = None
         Y_analitico = None
         try:
@@ -297,39 +295,35 @@ if __name__ == "__main__":
                 y_global_min = min(y_global_min, np.min(Y_analitico))
                 y_global_max = max(y_global_max, np.max(Y_analitico))
         except Exception as e:
-            print(f"No se pudo calcular la solución real: {e}")
+            print(f"No se pudo calcular la solucion real: {e}")
 
         margen_y = (y_global_max - y_global_min) * 0.1
         vista = Vista(a, b, y_global_min - margen_y, y_global_max + margen_y)
 
-        # Crear la gráfica solo una vez
         grafica = Grafica(vista)
         grafica.ejes()
         grafica.cuadricula()
         grafica.modo_interactivo(True)
 
-        # Dibujar solución analítica si existe
         if X_analitico is not None and Y_analitico is not None:
             grafica.curva(
-                "Solución analítica",
+                "Solucion analitica",
                 X_analitico.tolist(),
                 Y_analitico.tolist(),
                 color="black",
                 linewidth=2,
-                label="Solución real"
+                label="Solucion real"
             )
             grafica._ax.legend()
             grafica.actualizar()
 
-        # Graficar cada método inmediatamente después de imprimir su tabla
         for metodo, (X, Y) in resultados.items():
-            print("\n", f"Método de {titulo_metodo(metodo)}", tabla.encabezado(), sep="\n")
+            print("\n", f"Metodo de {titulo_metodo(metodo)}", tabla.encabezado(), sep="\n")
             for xi, yi in zip(X, Y):
                 print(tabla.fila(xi, yi))
 
-            # Graficar este método inmediatamente
             grafica.curva(
-                f"Método {titulo_metodo(metodo)}",
+                f"Metodo {titulo_metodo(metodo)}",
                 X.tolist(),
                 Y.tolist(),
                 linestyle="--",
@@ -339,8 +333,7 @@ if __name__ == "__main__":
             grafica._ax.legend()
             grafica.actualizar()
 
-            # Pausa para que el usuario vea el método
-            entrada = input("\nPresiona ENTER para mostrar el siguiente método (q para salir): ")
+            entrada = input("\nPresiona ENTER para mostrar el sig metodo (q para salir): ")
             if entrada.lower() == "q":
                 break
 
@@ -509,7 +502,6 @@ if __name__ == "__main__":
         Opcion("Resolver EDO", resolver_edo, activa = False),
         Opcion("Modificar Tamaño de Paso", modificar_paso, activa=False),
         Opcion("Modificar Metodos", modificar_metodos, activa=False),
-        Opcion("Cargar graficas", cargar_grafica, activa=False),
         Opcion("Cargar Ejemplo", cargar_ejemplo),
         Opcion("Salir", salir)],
         pre = status
