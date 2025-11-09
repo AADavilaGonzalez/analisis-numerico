@@ -48,8 +48,8 @@ class Grafica:
         self._res = res
         self._dt = dt
         self._obj = {}
-        plt.ion()
-        self._fig.show()
+        #plt.ion()
+        #self._fig.show()
 
     def ejes(self, color="black", **kwargs) -> None:
         self._ax.axhline(0, color=color, **kwargs)
