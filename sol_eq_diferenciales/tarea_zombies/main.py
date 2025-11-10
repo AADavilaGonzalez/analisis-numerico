@@ -35,11 +35,9 @@ def simular_sistema(metodo: Callable, f: VectorFuncion, y0: np.ndarray, t_fin: f
     #calcular numero de pasos
     n_pasos = int(t_fin / h)
     
-    # Prepara arrays para guardar los resultados
-    # Un array 1D para el tiempo
+
     t_valores = np.linspace(0, t_fin, n_pasos + 1)
     
-    # Un array 2D para S, Z, R
     y_valores = np.zeros((n_pasos + 1, len(y0)))
     y_valores[0] = y0 #nuestra condiciion inicial
     
@@ -90,7 +88,7 @@ ZETA = 0.01
 H = 0.1
 T_FINAL = 365
 
-# Define la función del modelo con los parámetros de la Parte 1
+#define la funcion del modelo con los parametros de la parte 1
 f_parte1 = lambda t, y: modelo_szr(t, y, beta=BETA, alpha=ALPHA, zeta=ZETA)
 
 t1, y1 = simular_sistema(runge_kutta_orden_4, f_parte1, y_inicial, T_FINAL, H)
@@ -104,9 +102,9 @@ R_fin = y1[-1, 2]
 print(f"\nValores finales en t={T_FINAL} dias:")
 tabla_fin = Tabla("Poblacion", "Valor final")
 print(tabla_fin.encabezado())
-print(tabla_fin.fila("S(t)", S_fin))
-print(tabla_fin.fila("Z(t)", Z_fin))
-print(tabla_fin.fila("R(t)", R_fin))
+print(tabla_fin.fila("S(t)", round(S_fin, 0)))
+print(tabla_fin.fila("Z(t)", round(Z_fin, 0)))
+print(tabla_fin.fila("R(t)", round(R_fin, 0)))
 
 
 # parte 2.1 convergencia
@@ -132,11 +130,9 @@ for h_paso in pasos_h:
 
 Grafica.mostrar()
 print("Generando graficos....")
-print("***Agregar reporte....***")
-
 
 #parte 2.2 sensibilidad en guerra total
-print("\n--- Ejecutando Parte 2.2: Escenario 'Guerra Total' (RK4) ---")
+print("\n*** Ejecutando Parte 2.2: Escenario 'Guerra Total' (RK4) ***")
 
 #nuevos parametros mejores
 ALPHA_NUEVO = 0.00002
@@ -150,8 +146,19 @@ t2, y2 = simular_sistema(runge_kutta_orden_4, f_parte2, y_inicial, T_FINAL, H)
 
 graficar_resultados(t2, y2, "Parte 2.2: Escenario de Guerra total (RK4, h=0.1)", ["S", "Z"])
 
+S_fin_2 = y2[-1, 0]
+Z_fin_2 = y2[-1, 1]
+R_fin_2 = y2[-1, 2]
+
+print(f"\nValores finales 'Guerra Total' en t={T_FINAL} dias:")
+tabla_fin_2 = Tabla("Poblacion", "Valor final")
+print(tabla_fin_2.encabezado())
+
+#redondeamos
+print(tabla_fin_2.fila("S(t)", round(S_fin_2, 0)))
+print(tabla_fin_2.fila("Z(t)", round(Z_fin_2, 0)))
+print(tabla_fin_2.fila("R(t)", round(R_fin_2, 0)))
 print("Generando graficos.")
-print("***falta reporte***.")
 
 print("\nMostrando todos los gráficos...")
 Grafica.mostrar()
