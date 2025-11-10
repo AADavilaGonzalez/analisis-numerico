@@ -4,6 +4,9 @@ entrega-*
 prueba_*
 prueba-*
 
+# Rich Text Editor Backup
+.~lock.*
+
 # Platform Specific
 .DS_Store
 
