@@ -1,30 +1,15 @@
 import arcade
-
-WINDOW_WIDTH = 1280
-WINDOW_HEIGHT = 720
-WINDOW_TITLE = "Gravity Sandbox"
-
-class GameView(arcade.View):
-
-    def __init__(self):
-        super().__init__()
-        self.background_color = arcade.csscolor.CORNFLOWER_BLUE
-
-    def setup(self):
-        pass
-
-    def on_draw(self):
-        self.clear()
+from view import SimulationView
+from simulacion import CalidadSimulacion
 
 if __name__ == "__main__":
     window = arcade.Window(
-        WINDOW_WIDTH,
-        WINDOW_HEIGHT,
-        WINDOW_TITLE
+        title = "Gravity Sandbox",
+        resizable=True,
+        center_window= True,
     )
-
-    game = GameView()
-    game.setup()
-
-    window.show_view(game)
+    sim = SimulationView(
+        CalidadSimulacion.BAJA
+    )
+    window.show_view(sim)
     arcade.run()

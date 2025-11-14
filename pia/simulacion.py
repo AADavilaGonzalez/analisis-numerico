@@ -23,7 +23,7 @@ class CalidadSimulacion(Enum):
 
 class SimulacionGravitacional2D:
 
-    G = 1
+    G = 0.00005
     COLS = 5
     POLITICA_DE_CRECIMIENTO = 2
 
@@ -32,23 +32,23 @@ class SimulacionGravitacional2D:
         objetos: list[ObjetoGravitacional],
         h: float,
         *,
-        calidadSimulacion: CalidadSimulacion,
-        capacidadInicial: int = 1
+        calidad: CalidadSimulacion = CalidadSimulacion.ALTA,
+        capacidad_inicial: int = 1
     ):
 
         self._h = h
         self._n = len(objetos)
-        self._capacidad = max(capacidadInicial, self._n)
+        self._capacidad = max(capacidad_inicial, self._n)
         self._buffer = np.empty((self._capacidad, self.COLS), dtype=np.float64)
 
-        self._M = self._buffer[:,0]
-        self._M[:self._n] = [obj.m for obj in objetos]
+        self._M = self._buffer[:self._n,0]
+        self._M[:] = [obj.m for obj in objetos]
 
-        self._R = self._buffer[:, 1:3]
+        self._R = self._buffer[:self._n, 1:3]
         self._R[:,0] = [obj.r.x for obj in objetos]
         self._R[:,1] = [obj.r.y for obj in objetos]
 
-        self._V = self._buffer[:, 3:5]
+        self._V = self._buffer[:self._n, 3:5]
         self._V[:,0] = [obj.v.x for obj in objetos]
         self._V[:,1] = [obj.v.y for obj in objetos]
   
@@ -56,7 +56,16 @@ class SimulacionGravitacional2D:
             obj.id : i for i, obj in enumerate(objetos)
         }
         
-        self.calidadSimulacion = calidadSimulacion
+        self.calidad_simulacion = calidad
+
+    @property
+    def n(self) -> int: return self._n
+
+
+    def __actualizar_vistas(self):
+        self._M = self._buffer[:self._n, 0]
+        self._R = self._buffer[:self._n, 1:3]
+        self._V = self._buffer[:self._n, 3:5]
 
 
     def add_objeto(self, obj: ObjetoGravitacional) -> bool:
@@ -68,21 +77,22 @@ class SimulacionGravitacional2D:
             nuevo_buffer[:self._n] = self._buffer
             self._buffer = nuevo_buffer
             self._capacidad = nueva_capacidad
-            self._M = self._buffer[:, 0]
-            self._R = self._buffer[:, 1:3]
-            self._V = self._buffer[:, 3:5]
         self._buffer[self._n, :] = cols_obj
         self._posiciones[obj.id] = self._n
         self._n += 1
+        self.__actualizar_vistas()
         return True
 
 
     def delete_objeto(self, id: Hashable) -> bool:
         i = self._posiciones.get(id)
-        if i is None:
-            return False
-        self._buffer[:, i:self._n-1] = self._buffer[:, i+1:self._n]
+        if i is None: return False
+        self._buffer[i:self._n-1, :] = self._buffer[i+1:self._n, :]
+        del self._posiciones[id]
+        for id, pos in self._posiciones.items():
+            if pos > i: self._posiciones[id] -= 1
         self._n -= 1
+        self.__actualizar_vistas()
         return True
             
 
@@ -96,6 +106,15 @@ class SimulacionGravitacional2D:
            v = Punto(self._V[i,0], self._V[i,1])
         )
 
+    def get_objetos(self) -> list[ObjetoGravitacional]:
+        return [
+            ObjetoGravitacional(
+                id = id,
+                m = self._M[i],
+                r = Punto(self._R[i,0], self._R[i,1]),
+                v = Punto(self._V[i,0], self._V[i,1])
+            ) for id, i in self._posiciones.items()
+        ]
 
     def set_objeto(self, obj: ObjetoGravitacional) -> None:
         i = self._posiciones.get(id)
@@ -119,6 +138,7 @@ class SimulacionGravitacional2D:
             R_mag_cuad = np.sum(R_dist**2, axis=1) # (n, 1) : |rj-ri|^2
             R_mag_cuad[i] = 1.0 # Evitar dividir por cero
             factores = self._M / R_mag_cuad**1.5 # (n,) : mj / |rj-ri|^3
+            factores[i] = 0.0
             aceleraciones = factores[:, np.newaxis] * R_dist # (n,2) : mj(rj-ri)/|rj-ri|^3
             A[i] = self.G*np.sum(aceleraciones, axis=0) # (2,) : G*sum(...)
         return A # (n,2)
@@ -151,8 +171,8 @@ class SimulacionGravitacional2D:
         self._R += self._h/6*(k1_R+2*k2_R+2*k3_R+k4_R)
         self._V += self._h/6*(k1_V+2*k2_V+2*k3_V+k4_V)
 
-    def avanzarSimulacion(self) -> None:
-        match(self.calidadSimulacion):
+    def avanzar_simulacion(self) -> None:
+        match(self.calidad_simulacion):
             case CalidadSimulacion.BAJA: self.euler()
             case CalidadSimulacion.MEDIA: self.punto_medio()
             case CalidadSimulacion.ALTA: self.rk4()
