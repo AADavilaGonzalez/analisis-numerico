@@ -1,9 +1,11 @@
 # Applicacion de simulacion gravitacional en 2D
 
-No utilizen ninguna dependencia de utils en este proyecto.
-El proyecto no es un solo script, es un applicacion entonces
-segmenten el proyecto en varios modulos como una applicacion
-normal
+Simulacion gravitacional utilizando los metodos numericos de
+solucion de sistemas de ecuaciones diferenciales. Esta es una
+simulacion adaptativa de n cuerpos gravitacionales
+
+## Como correr el programa
+en la terminal introduzca `python main.py`
 
 ## Version de python
 3.13.9
