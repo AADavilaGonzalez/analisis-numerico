@@ -4,6 +4,10 @@ entrega-*
 prueba_*
 prueba-*
 
+# Archives
+*.zip
+*.tar
+
 # Rich Text Editor Backup
 .~lock.*
 
